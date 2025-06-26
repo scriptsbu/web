@@ -7,7 +7,7 @@
   <style>
     body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f0f4f8; }
     .container { text-align: center; }
-    .password-box { font-size: 1.8em; margin: 20px 0; padding: 10px 20px; border: 2px solid #007BFF; border-radius: 8px; display: inline-block; background-color: #ffffff; min-width: 200px; }
+    .password-box { font-size: 1.8em; margin: 20px 0; padding: 10px 20px; border: 2px solid #007BFF; border-radius: 8px; display: inline-block; background-color: #ffffff; min-width: 250px; }
     .buttons { margin-top: 10px; }
     button { padding: 10px 20px; font-size: 1em; border: none; margin: 5px; background-color: #007BFF; color: white; border-radius: 5px; cursor: pointer; }
     button:hover { background-color: #0056b3; }
@@ -16,51 +16,43 @@
 </head>
 <body>
   <div class="container">
-    <img class="clipart" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/US_Navy_110303-N-PS473-094_The_guided-missile_destroyer_USS_Bulkeley_%28DDG_84%29_transits_the_Arabian_Gulf.jpg/640px-US_Navy_110303-N-PS473-094_The_guided-missile_destroyer_USS_Bulkeley_%28DDG_84%29_transits_the_Arabian_Gulf.jpg" alt="Warship Clipart">
+    <img class="clipart" src="https://cdn.pixabay.com/photo/2020/06/16/07/38/navy-ship-5302127_960_720.png" alt="Warship Clipart">
     <h1>Alberto's Easy Password Generator</h1>
     <div class="password-box" id="password">Click below to generate</div>
     <div class="buttons">
-      <button onclick="generatePassword()">Generate Password</button>
+      <button onclick="generatePassword()">Generate Passphrase</button>
       <button onclick="copyPassword()">Copy to Clipboard</button>
     </div>
   </div>
 
   <script>
     function generatePassword() {
-      const upper = "ABCDEFGHJKMNPQRSTUVWXYZ"; // removed I, L, O
-      const lower = "abcdefghjkmnpqrstuvwxyz"; // removed i, l, o
-      const digits = "23456789"; // removed 0 and 1
+      const words = [
+        "sun", "moon", "tree", "jump", "wave", "rock", "bolt", "light", "drift", "leaf",
+        "cloud", "wind", "calm", "bird", "hawk", "dawn", "glow", "breeze", "flame", "dust"
+      ];
+      const digits = "23456789";
 
-      function sample(str, count) {
+      function sample(arr, count) {
         let result = [];
-        const chars = str.split('');
         for (let i = 0; i < count; i++) {
-          const idx = Math.floor(Math.random() * chars.length);
-          result.push(chars[idx]);
+          const idx = Math.floor(Math.random() * arr.length);
+          result.push(arr[idx]);
         }
         return result;
       }
 
-      const upperChars = sample(upper, 2);
-      const lowerChars = sample(lower, 4);
-      const digitChars = sample(digits, 2);
+      const chosenWords = sample(words, 2);
+      const numbers = sample(digits.split(''), 2).join('');
+      const password = chosenWords.join('') + numbers;
 
-      const letterChars = upperChars.concat(lowerChars);
-
-      // Shuffle letters only
-      for (let i = letterChars.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [letterChars[i], letterChars[j]] = [letterChars[j], letterChars[i]];
-      }
-
-      const password = letterChars.join('') + digitChars.join('');
       document.getElementById("password").textContent = password;
     }
 
     function copyPassword() {
       const password = document.getElementById("password").textContent;
       navigator.clipboard.writeText(password).then(() => {
-        alert("Password copied to clipboard!");
+        alert("Passphrase copied to clipboard!");
       }, err => {
         alert("Failed to copy: " + err);
       });
