@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Password Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f0f4f8; }
+    .container { text-align: center; }
+    .password-box { font-size: 1.8em; margin: 20px 0; padding: 10px 20px; border: 2px solid #007BFF; border-radius: 8px; display: inline-block; background-color: #ffffff; min-width: 200px; }
+    .buttons { margin-top: 10px; }
+    button { padding: 10px 20px; font-size: 1em; border: none; margin: 5px; background-color: #007BFF; color: white; border-radius: 5px; cursor: pointer; }
+    button:hover { background-color: #0056b3; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Readable Password Generator</h1>
+    <div class="password-box" id="password">Click below to generate</div>
+    <div class="buttons">
+      <button onclick="generatePassword()">Generate Password</button>
+      <button onclick="copyPassword()">Copy to Clipboard</button>
+    </div>
+  </div>
+
+  <script>
+    function generatePassword() {
+      const upper = "ABCDEFGHJKMNPQRSTUVWXYZ"; // removed I, L, O
+      const lower = "abcdefghjkmnpqrstuvwxyz"; // removed i, l, o
+      const digits = "23456789"; // removed 0 and 1
+
+      function sample(str, count) {
+        let result = [];
+        const chars = str.split('');
+        for (let i = 0; i < count; i++) {
+          const idx = Math.floor(Math.random() * chars.length);
+          result.push(chars[idx]);
+        }
+        return result;
+      }
+
+      const upperChars = sample(upper, 2);
+      const lowerChars = sample(lower, 4);
+      const digitChars = sample(digits, 2);
+
+      const allChars = upperChars.concat(lowerChars, digitChars);
+      for (let i = allChars.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allChars[i], allChars[j]] = [allChars[j], allChars[i]];
+      }
+
+      document.getElementById("password").textContent = allChars.join('');
+    }
+
+    function copyPassword() {
+      const password = document.getElementById("password").textContent;
+      navigator.clipboard.writeText(password).then(() => {
+        alert("Password copied to clipboard!");
+      }, err => {
+        alert("Failed to copy: " + err);
+      });
+    }
+  </script>
+</body>
+</html>
