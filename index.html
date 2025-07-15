@@ -44,7 +44,7 @@
 
       const chosenWords = sample(words, 2).map(word => word.charAt(0).toUpperCase() + word.slice(1));
       const numbers = sample(digits.split(''), 3).join('');
-      const passphrase = `${chosenWords[0]}/${chosenWords[1]}/${numbers}`;
+      const passphrase = `${chosenWords[0]}-${chosenWords[1]}-${numbers}`;
 
       document.getElementById("password").textContent = passphrase;
     }
