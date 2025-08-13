@@ -79,17 +79,20 @@ echo "Please wait..."`;
     }
 
     function downloadScripts() {
+      const username = document.getElementById("username").value || "tailscale";
+      const safeUsername = username.replace(/[^a-zA-Z0-9-_]/g, "_");
+
       const winBlob = new Blob([document.getElementById("windowsScript").value], { type: "text/plain" });
       const macBlob = new Blob([document.getElementById("macScript").value], { type: "text/plain" });
 
       const winLink = document.createElement("a");
       winLink.href = URL.createObjectURL(winBlob);
-      winLink.download = "tailscale-login.bat";
+      winLink.download = `${safeUsername}-login.bat`;
       winLink.click();
 
       const macLink = document.createElement("a");
       macLink.href = URL.createObjectURL(macBlob);
-      macLink.download = "tailscale-login.sh";
+      macLink.download = `${safeUsername}-login.sh`;
       macLink.click();
     }
   </script>
