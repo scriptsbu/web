@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tailscale Script Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    label, select, input { margin-top: 10px; display: block; }
+    textarea { width: 100%; height: 180px; margin-top: 10px; font-family: monospace; }
+    button { margin: 10px 10px 0 0; }
+  </style>
+</head>
+<body>
+  <h1>Tailscale Script Generator</h1>
+
+  <label for="username">Username/Hostname:</label>
+  <input type="text" id="username" placeholder="first-last or username" />
+
+  <label for="key">Auth Key:</label>
+  <input type="text" id="key" placeholder="input-key-here" />
+
+  <label for="server">Login Server:</label>
+  <input type="text" id="server" placeholder="https://coordination.example.com" />
+
+  <label for="nickname">Nickname:</label>
+  <input type="text" id="nickname" placeholder="fleet or mfg or custom" />
+
+  <button onclick="generateScripts()">Generate Scripts</button>
+  <button onclick="downloadScripts()">Download Scripts</button>
+
+  <h2>Windows Batch Script</h2>
+  <textarea id="windowsScript" readonly></textarea>
+  <button onclick="copyToClipboard('windowsScript')">Copy Windows Script</button>
+
+  <h2>macOS Shell Script</h2>
+  <textarea id="macScript" readonly></textarea>
+  <button onclick="copyToClipboard('macScript')">Copy macOS Script</button>
+
+  <script>
+    function generateScripts() {
+      const username = document.getElementById("username").value;
+      const key = document.getElementById("key").value;
+      const server = document.getElementById("server").value;
+      const nickname = document.getElementById("nickname").value;
+
+      const windowsScript =
+`tailscale login \
+--accept-dns \
+--hostname ${username} \
+--login-server ${server} \
+--auth-key ${key} \
+--nickname ${nickname}
+
+echo "Please wait..."
+pause`;
+
+      const macScript =
+`echo 'alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"' >> ~/.zshrc
+source ~/.zshrc
+
+tailscale login \
+--accept-dns \
+--hostname ${username} \
+--login-server ${server} \
+--auth-key ${key} \
+--nickname ${nickname}
+echo "Please wait..."`;
+
+      document.getElementById("windowsScript").value = windowsScript;
+      document.getElementById("macScript").value = macScript;
+    }
+
+    function copyToClipboard(id) {
+      const textarea = document.getElementById(id);
+      textarea.select();
+      textarea.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+    }
+
+    function downloadScripts() {
+      const winBlob = new Blob([document.getElementById("windowsScript").value], { type: "text/plain" });
+      const macBlob = new Blob([document.getElementById("macScript").value], { type: "text/plain" });
+
+      const winLink = document.createElement("a");
+      winLink.href = URL.createObjectURL(winBlob);
+      winLink.download = "tailscale-login.bat";
+      winLink.click();
+
+      const macLink = document.createElement("a");
+      macLink.href = URL.createObjectURL(macBlob);
+      macLink.download = "tailscale-login.sh";
+      macLink.click();
+    }
+  </script>
+</body>
+</html>
