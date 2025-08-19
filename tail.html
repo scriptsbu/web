@@ -1,232 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Zulu (UTC) → Timezones</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tailscale Script Generator</title>
   <style>
-    :root { --bg:#0f172a; --panel:#111827; --muted:#94a3b8; --fg:#e5e7eb; --accent:#22d3ee; --bad:#f87171; --ok:#34d399; }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu; background:linear-gradient(120deg,#0b1220,#0f172a 35%,#0a1326 70%); color:var(--fg)}
-    .wrap{max-width:1000px; margin:40px auto; padding:0 16px}
-    .card{background:rgba(17,24,39,.75); backdrop-filter:saturate(140%) blur(6px); border:1px solid rgba(255,255,255,.08); border-radius:18px; box-shadow:0 10px 40px rgba(0,0,0,.35)}
-    header{display:flex; gap:14px; align-items:center; padding:20px 22px; border-bottom:1px solid rgba(255,255,255,.07)}
-    header h1{font-size:20px; margin:0; letter-spacing:.3px}
-    header .tag{font-size:12px; color:var(--muted); padding:2px 8px; border:1px solid rgba(255,255,255,.1); border-radius:999px}
-    .grid{display:grid; gap:14px; grid-template-columns:1.2fr .8fr}
-    .controls{padding:18px 22px; display:grid; gap:14px}
-    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-    input[type=text]{flex:1 1 420px; background:#0b1020; color:var(--fg); border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:12px 14px; font-size:14px}
-    input::placeholder{color:#64748b}
-    button{appearance:none; border:none; border-radius:10px; padding:11px 14px; font-weight:600; color:#0f172a; background:var(--accent); cursor:pointer}
-    button.alt{background:#1f2937; color:var(--fg); border:1px solid rgba(255,255,255,.14)}
-    .error{color:var(--bad); font-size:13px}
-    .hint{font-size:12px; color:var(--muted)}
-    .zones{padding:0 22px 18px; display:grid; gap:10px}
-    .zone-list{display:flex; flex-wrap:wrap; gap:8px}
-    .pill{display:inline-flex; gap:8px; align-items:center; border:1px solid rgba(255,255,255,.14); color:var(--fg); background:#0b1020; padding:8px 10px; border-radius:999px; font-size:13px}
-    .pill input{accent-color:var(--accent)}
-    table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.1)}
-    thead th{background:#0b1020; color:var(--muted); text-align:left; padding:10px 12px; font-weight:600; font-size:13px}
-    tbody td{padding:14px 12px; border-top:1px solid rgba(255,255,255,.06); font-size:14px}
-    tbody tr:nth-child(odd) td{background:rgba(255,255,255,.02)}
-    .abbr{font-variant:all-small-caps; letter-spacing:.5px; opacity:.9}
-    .footer{padding:14px 22px; border-top:1px solid rgba(255,255,255,.07); font-size:12px; color:var(--muted)}
-    @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    label, select, input { margin-top: 10px; display: block; }
+    textarea { width: 100%; height: 180px; margin-top: 10px; font-family: monospace; }
+    button { margin: 10px 10px 0 0; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <header>
-        <h1>Zulu (UTC) → Local Timezones</h1>
-        <span class="tag">Paste an ISO Z time e.g. <code>2025-08-18T22:54:06Z</code></span>
-      </header>
-      <div class="grid">
-        <section class="controls">
-          <div class="row">
-            <input id="utcInput" type="text" placeholder="2025-08-18T22:54:06Z or 2025-08-18 22:54:06Z" />
-            <button id="nowBtn" title="Use current UTC">Now (UTC)</button>
-            <button id="convertBtn">Convert</button>
-          </div>
-          <div class="hint">Tip: Paste any ISO-8601 time with <strong>Z</strong> (Zulu/UTC) or an explicit offset. Daylight saving is handled automatically for each region.</div>
-          <div id="err" class="error" role="alert" aria-live="polite"></div>
-        </section>
+  <h1>Tailscale Script Generator</h1>
 
-        <section class="zones">
-          <div class="hint">Select the timezones you want to display:</div>
-          <div id="zoneList" class="zone-list"></div>
-          <div class="row">
-            <button class="alt" id="selectUS">US core</button>
-            <button class="alt" id="selectWorld">US + UK + AU</button>
-            <button class="alt" id="clearZones">Clear</button>
-          </div>
-        </section>
-      </div>
+  <label for="username">Username/Hostname:</label>
+  <input type="text" id="username" placeholder="first-last or username" />
 
-      <section style="padding:18px 22px">
-        <table aria-describedby="table-desc">
-          <thead>
-            <tr>
-              <th>Region</th>
-              <th>Time</th>
-              <th>Offset</th>
-              <th>Abbrev</th>
-            </tr>
-          </thead>
-          <tbody id="results"></tbody>
-        </table>
-        <div id="table-desc" class="hint" style="margin-top:8px">Abbreviations are best‑effort and may display as GMT offsets in some browsers; the local offset is always accurate.</div>
-      </section>
+  <label for="key">Auth Key:</label>
+  <input type="text" id="key" placeholder="input-key-here" />
 
-      <div class="footer">Built with the browser's <code>Intl.DateTimeFormat</code>. No libraries, no network calls.</div>
-    </div>
-  </div>
+  <label for="server">Login Server:</label>
+  <input type="text" id="server" placeholder="https://coordination.example.com" />
 
-<script>
-// --- Configuration ---
-const ALL_ZONES = [
-  { id: 'America/New_York', label: 'US Eastern (NY)', short: 'ET' },
-  { id: 'America/Chicago', label: 'US Central (CHI)', short: 'CT' },
-  { id: 'America/Denver', label: 'US Mountain (DEN)', short: 'MT' },
-  { id: 'America/Los_Angeles', label: 'US Pacific (LA)', short: 'PT' },
-  { id: 'Pacific/Honolulu', label: 'Hawaii (HNL)', short: 'HST' },
-  { id: 'Europe/London', label: 'United Kingdom (LDN)', short: 'UK' },
-  { id: 'Australia/Sydney', label: 'Australia (Sydney)', short: 'AET' },
-  { id: 'Australia/Perth', label: 'Australia (Perth)', short: 'AWST' },
-];
+  <label for="nickname">Nickname:</label>
+  <input type="text" id="nickname" placeholder="fleet or mfg or custom" />
 
-const DEFAULT_US = ['America/New_York','America/Chicago','America/Denver','America/Los_Angeles','Pacific/Honolulu'];
-const DEFAULT_WORLD = [...DEFAULT_US, 'Europe/London','Australia/Sydney'];
+  <button onclick="generateScripts()">Generate Scripts</button>
+  <button onclick="downloadScripts()">Download Scripts</button>
 
-// --- Elements ---
-const utcInput = document.getElementById('utcInput');
-const resultsEl = document.getElementById('results');
-const errEl = document.getElementById('err');
-const zoneListEl = document.getElementById('zoneList');
+  <h2>Windows Batch Script</h2>
+  <textarea id="windowsScript" readonly></textarea>
+  <button onclick="copyToClipboard('windowsScript')">Copy Windows Script</button>
 
-// --- Helpers ---
-function toUTCDate(value){
-  // Accepts ISO strings with Z or with space; normalizes to ISO by replacing space with 'T'.
-  if(!value) return new Date(NaN);
-  let v = value.trim();
-  if(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}Z?$/i.test(v)) v = v.replace(' ', 'T');
-  const d = new Date(v);
-  return d;
-}
+  <h2>macOS Shell Script</h2>
+  <textarea id="macScript" readonly></textarea>
+  <button onclick="copyToClipboard('macScript')">Copy macOS Script</button>
 
-function fmtInZone(d, tz){
-  const opts = { hour12:false, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone: tz };
-  const parts = new Intl.DateTimeFormat(undefined, opts).formatToParts(d);
-  const get = t => parts.find(p=>p.type===t)?.value;
-  const display = `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
+  <script>
+    function generateScripts() {
+      const username = document.getElementById("username").value;
+      const key = document.getElementById("key").value;
+      const server = document.getElementById("server").value;
+      const nickname = document.getElementById("nickname").value;
 
-  // Offset (e.g., UTC-05:00) — compute via formatting to GMT offset
-  const offFmt = new Intl.DateTimeFormat(undefined, { timeZone: tz, timeZoneName: 'shortOffset', hour:'2-digit' });
-  const off = offFmt.format(d).match(/GMT[+-]\d{2}:?\d{2}/)?.[0]?.replace('GMT','UTC') || 'UTC±00:00';
+      const windowsScript =
+`tailscale login \
+--accept-dns \
+--hostname ${username} \
+--login-server ${server} \
+--auth-key ${key} \
+--nickname ${nickname}
 
-  // Abbrev best‑effort (PDT, EST, etc.) — may fall back to GMT+/-
-  const abbrFmt = new Intl.DateTimeFormat(undefined, { timeZone: tz, timeZoneName:'short' , hour:'2-digit'});
-  const abbr = abbrFmt.format(d).split(' ').pop();
+echo "Please wait..."
+pause`;
 
-  return { display, off, abbr };
-}
+      const macScript =
+`echo 'alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"' >> ~/.zshrc
+source ~/.zshrc
 
-function renderZones(){
-  zoneListEl.innerHTML = '';
-  ALL_ZONES.forEach(z => {
-    const id = `z_${z.id.replace(/\W/g,'_')}`;
-    const pill = document.createElement('label');
-    pill.className = 'pill';
-    pill.innerHTML = `<input type="checkbox" id="${id}" data-tz="${z.id}" /> <span>${z.label}</span>`;
-    zoneListEl.appendChild(pill);
-  });
-  // Preselect defaults
-  DEFAULT_WORLD.forEach(tz => {
-    const el = zoneListEl.querySelector(`[data-tz="${tz}"]`);
-    if(el) el.checked = true;
-  });
-}
+tailscale login \
+--accept-dns \
+--hostname ${username} \
+--login-server ${server} \
+--auth-key ${key} \
+--nickname ${nickname}
+echo "Please wait..."`;
 
-function selectedZones(){
-  return Array.from(zoneListEl.querySelectorAll('input[type=checkbox]:checked')).map(i=>i.getAttribute('data-tz'));
-}
+      document.getElementById("windowsScript").value = windowsScript;
+      document.getElementById("macScript").value = macScript;
+    }
 
-function convert(){
-  errEl.textContent = '';
-  resultsEl.innerHTML = '';
-  const raw = utcInput.value.trim();
-  const d = toUTCDate(raw);
+    function copyToClipboard(id) {
+      const textarea = document.getElementById(id);
+      textarea.select();
+      textarea.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+    }
 
-  if(!raw){
-    errEl.textContent = 'Enter a UTC time like 2025-08-18T22:54:06Z';
-    return;
-  }
-  if(isNaN(+d)){
-    errEl.textContent = 'Could not parse that time. Make sure it\'s ISO‑8601 (include Z for UTC or an explicit offset).';
-    return;
-  }
+    function downloadScripts() {
+      const username = document.getElementById("username").value || "tailscale";
+      const safeUsername = username.replace(/[^a-zA-Z0-9-_]/g, "_");
 
-  const zones = selectedZones();
-  if(zones.length === 0){ errEl.textContent = 'Pick at least one timezone below.'; return; }
+      const winBlob = new Blob([document.getElementById("windowsScript").value], { type: "text/plain" });
+      const macBlob = new Blob([document.getElementById("macScript").value], { type: "text/plain" });
 
-  zones.forEach(tz => {
-    const meta = ALL_ZONES.find(z=>z.id===tz) || {label: tz};
-    const { display, off, abbr } = fmtInZone(d, tz);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><span class="abbr">${meta.short?meta.short:''}</span> ${meta.label || tz}<div class="hint">${tz}</div></td>
-      <td><strong>${display}</strong></td>
-      <td>${off}</td>
-      <td>${abbr}</td>
-    `;
-    resultsEl.appendChild(tr);
-  });
-}
+      const winLink = document.createElement("a");
+      winLink.href = URL.createObjectURL(winBlob);
+      winLink.download = `${safeUsername}-login.bat`;
+      winLink.click();
 
-// --- Wiring ---
-renderZones();
-
-// Buttons
- document.getElementById('convertBtn').addEventListener('click', convert);
- document.getElementById('nowBtn').addEventListener('click', () => {
-   // current time in UTC as ISO Z seconds precision
-   const now = new Date();
-   const iso = new Date(Date.UTC(
-     now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
-     now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()
-   )).toISOString().replace(/\.\d{3}Z$/, 'Z');
-   utcInput.value = iso;
-   convert();
- });
-
- // Quick selects
- document.getElementById('selectUS').addEventListener('click', () => {
-   zoneListEl.querySelectorAll('input').forEach(i=> i.checked = false);
-   DEFAULT_US.forEach(tz => { const el = zoneListEl.querySelector(`[data-tz="${tz}"]`); if(el) el.checked = true; });
-   convert();
- });
- document.getElementById('selectWorld').addEventListener('click', () => {
-   zoneListEl.querySelectorAll('input').forEach(i=> i.checked = false);
-   DEFAULT_WORLD.forEach(tz => { const el = zoneListEl.querySelector(`[data-tz="${tz}"]`); if(el) el.checked = true; });
-   convert();
- });
- document.getElementById('clearZones').addEventListener('click', () => {
-   zoneListEl.querySelectorAll('input').forEach(i=> i.checked = false);
-   resultsEl.innerHTML = '';
- });
-
- // Paste to convert immediately
- utcInput.addEventListener('paste', (e) => {
-   setTimeout(convert, 0);
- });
- // Enter to convert
- utcInput.addEventListener('keydown', (e) => { if(e.key==='Enter') convert(); });
-
- // Autofill example
- utcInput.value = '';
- convert();
-</script>
+      const macLink = document.createElement("a");
+      macLink.href = URL.createObjectURL(macBlob);
+      macLink.download = `${safeUsername}-login.sh`;
+      macLink.click();
+    }
+  </script>
 </body>
 </html>
