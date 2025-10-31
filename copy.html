@@ -96,7 +96,7 @@
 <body>
   <main class="card" role="main">
     <h1>Quick Name & Email Copier</h1>
-    <p class="helper">Paste an email like <em>first.last@saronic.com</em>. We'll parse and give you copyable fields.</p>
+    <p class="helper">Paste an email like <em>first.last@domain.com</em>. We'll parse and give you copyable fields.</p>
 
     <div class="stack" aria-live="polite">
       <div class="field">
@@ -216,7 +216,7 @@
 
     // Initialize with example
     window.addEventListener('DOMContentLoaded', () => {
-      emailInput.value = 'first.last@saronic.com';
+      emailInput.value = 'first.last@domain.com';
       parseEmail(emailInput.value);
     });
   </script>
