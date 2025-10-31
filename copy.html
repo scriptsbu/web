@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Email Parser & Copier</title>
+  <style>
+    :root {
+      --bg: #0f172a;        /* slate-900 */
+      --panel: #111827;     /* gray-900 */
+      --muted: #94a3b8;     /* slate-400 */
+      --text: #e5e7eb;      /* gray-200 */
+      --accent: #22c55e;    /* green-500 */
+      --accent-600: #16a34a;/* green-600 */
+      --ring: rgba(34, 197, 94, 0.35);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 50% -10%, #1f2937 0%, var(--bg) 55%);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 720px;
+      background: linear-gradient(180deg, #111827 0%, #0b1220 100%);
+      border: 1px solid #1f2937;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      padding: 22px;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(20px, 2.4vw, 28px);
+      letter-spacing: .2px;
+    }
+    p.helper {
+      margin: 4px 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .row { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+    .stack { display: grid; gap: 12px; }
+    .field { display: grid; gap: 6px; }
+    label { font-size: 13px; color: var(--muted); }
+    input[type="text"], input[type="email"] {
+      background: #0b1220;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      color: var(--text);
+      padding: 12px 14px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+      width: 100%;
+    }
+    input[readonly] { color: #cbd5e1; }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 5px var(--ring); }
+
+    button {
+      border: 1px solid #1f2937;
+      background: linear-gradient(180deg, #1e293b 0%, #0b1220 100%);
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform .02s ease, background .15s ease, border-color .15s ease;
+    }
+    button:hover { border-color: #334155; }
+    button:active { transform: translateY(1px); }
+
+    .primary {
+      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-600) 100%);
+      color: #062612;
+      font-weight: 600;
+      border-color: transparent;
+    }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 700px) { .grid-3 { grid-template-columns: 1fr; } }
+
+    .copy-wrap { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+    .copied {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 5px var(--ring) !important;
+      transition: box-shadow .25s ease, border-color .25s ease;
+    }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <main class="card" role="main">
+    <h1>Quick Name & Email Copier</h1>
+    <p class="helper">Paste an email like <em>jon.murphy@saronic.com</em>. We'll parse and give you copyable fields.</p>
+
+    <div class="stack" aria-live="polite">
+      <div class="field">
+        <label for="email">Email</label>
+        <div class="row">
+          <input id="email" type="email" inputmode="email" placeholder="first.last@company.com" autocomplete="off" spellcheck="false" />
+          <button id="parse" class="primary" title="Parse from email">Parse</button>
+        </div>
+        <div class="hint">Press <kbd>Enter</kbd> to parse automatically.</div>
+      </div>
+
+      <div class="grid-3">
+        <div class="field">
+          <label for="first">First name</label>
+          <div class="copy-wrap">
+            <input id="first" type="text" readonly placeholder="—" />
+            <button data-copy="first" title="Copy first name">Copy</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="last">Last name</label>
+          <div class="copy-wrap">
+            <input id="last" type="text" readonly placeholder="—" />
+            <button data-copy="last" title="Copy last name">Copy</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="fullEmail">Email</label>
+          <div class="copy-wrap">
+            <input id="fullEmail" type="text" readonly placeholder="—" />
+            <button data-copy="fullEmail" title="Copy email">Copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const $ = sel => document.querySelector(sel);
+    const emailInput = $('#email');
+    const firstInput = $('#first');
+    const lastInput = $('#last');
+    const fullEmailInput = $('#fullEmail');
+    const parseBtn = $('#parse');
+
+    function titleCase(str) {
+      if (!str) return '';
+      return str
+        .toLowerCase()
+        .split(/([-'\s])/g) // keep hyphens/apostrophes/spaces as separators
+        .map(part => /^[A-Za-z]/.test(part) ? part[0].toUpperCase() + part.slice(1) : part)
+        .join('')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function parseEmail(value) {
+      const raw = (value || '').trim();
+      fullEmailInput.value = raw;
+      if (!raw.includes('@')) {
+        firstInput.value = '';
+        lastInput.value = '';
+        return;
+      }
+      const local = raw.split('@')[0];
+      if (!local) { firstInput.value = ''; lastInput.value = ''; return; }
+
+      // Split on common separators: dot, underscore, hyphen
+      const parts = local.split(/[._-]+/).filter(Boolean);
+      let first = parts[0] || '';
+      let last = parts.length > 1 ? parts[parts.length - 1] : '';
+
+      firstInput.value = titleCase(first);
+      lastInput.value = titleCase(last);
+    }
+
+    function copyFrom(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const text = el.value;
+      if (!text) return;
+      const originalBorder = el.style.borderColor;
+      el.classList.add('copied');
+      setTimeout(() => el.classList.remove('copied'), 600);
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(() => fallbackCopy(el));
+      } else {
+        fallbackCopy(el);
+      }
+    }
+
+    function fallbackCopy(el) {
+      el.select();
+      document.execCommand('copy');
+      el.blur();
+    }
+
+    // Events
+    parseBtn.addEventListener('click', () => parseEmail(emailInput.value));
+    emailInput.addEventListener('input', () => parseEmail(emailInput.value));
+    emailInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        parseEmail(emailInput.value);
+        firstInput.focus();
+        firstInput.select();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-copy]');
+      if (!btn) return;
+      const targetId = btn.getAttribute('data-copy');
+      copyFrom(targetId);
+    });
+
+    // Initialize with example
+    window.addEventListener('DOMContentLoaded', () => {
+      emailInput.value = 'jon.murphy@saronic.com';
+      parseEmail(emailInput.value);
+    });
+  </script>
+</body>
+</html>
