@@ -5,46 +5,178 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Password Generator</title>
   <style>
-    body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f0f4f8; }
-    .container { text-align: center; }
-    .password-box { font-size: 1.8em; margin: 20px 0; padding: 10px 20px; border: 2px solid #007BFF; border-radius: 8px; display: inline-block; background-color: #ffffff; min-width: 250px; }
-    .buttons { margin-top: 10px; }
-    button { padding: 10px 20px; font-size: 1em; border: none; margin: 5px; background-color: #007BFF; color: white; border-radius: 5px; cursor: pointer; }
-    button:hover { background-color: #0056b3; }
-    .clipart { max-width: 300px; margin-bottom: 20px; }
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --accent: #22c55e;
+      --accent-600: #16a34a;
+      --ring: rgba(34, 197, 94, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial;
+      background: radial-gradient(1200px 800px at 50% -10%, #1f2937 0%, var(--bg) 55%);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 720px;
+      background: linear-gradient(180deg, #111827 0%, #0b1220 100%);
+      border: 1px solid #1f2937;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      padding: 32px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(22px, 2.6vw, 32px);
+    }
+
+    .clipart {
+      max-width: 200px;
+      margin-bottom: 24px;
+      filter: drop-shadow(0 0 12px var(--ring));
+      border-radius: 12px;
+    }
+
+    .password-box {
+      font-size: 1.6em;
+      margin: 20px 0;
+      padding: 14px 24px;
+      border: 1px solid #1f2937;
+      border-radius: 14px;
+      background: #0b1220;
+      color: var(--accent);
+      min-width: 280px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      box-shadow: inset 0 0 10px rgba(34,197,94,0.15);
+      user-select: all;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid #1f2937;
+      background: linear-gradient(180deg, #1e293b 0%, #0b1220 100%);
+      color: var(--text);
+      padding: 10px 18px;
+      font-size: 15px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform .02s ease, background .15s ease, border-color .15s ease;
+    }
+
+    button:hover { border-color: #334155; }
+    button:active { transform: translateY(1px); }
+
+    .primary {
+      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-600) 100%);
+      color: #062612;
+      font-weight: 600;
+      border-color: transparent;
+      box-shadow: 0 0 12px var(--ring);
+    }
+
+    .options {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <img class="clipart" src="https://openclipart.org/image/800px/277654" alt="Warship Clipart">
-    <h1>Alberto's Easy Password Generator</h1>
+  <main class="card">
+    <img class="clipart" src="A_logo_with_shades_of_dark_blue_and_green_accents_.png" alt="Corsair Logo">
+    <h1>Easy Password Generator</h1>
     <div class="password-box" id="password">Click below to generate</div>
     <div class="buttons">
-      <button onclick="generatePassword()">Generate Passphrase</button>
+      <button class="primary" onclick="generatePassword()">Generate Passphrase</button>
       <button onclick="copyPassword()">Copy to Clipboard</button>
     </div>
-  </div>
+    <div class="options">
+      <label for="symbols"><input type="checkbox" id="symbols"> Include up to 2 symbols (!@#$%^&*)</label>
+    </div>
+    <p class="hint">Passphrases use random four-letter words, optional digits, and symbols for strong security.</p>
+  </main>
 
   <script>
-    function generatePassword() {
-      const words = [
-        "moon", "walk", "tree", "jump", "wave", "rock", "bolt", "star", "drip", "leaf",
-        "wind", "calm", "bird", "hawk", "dawn", "glow", "dust", "path", "fire", "sand"
-      ];
-      const digits = "23456789";
+    const words = [
+      "moon","tree","jump","wave","rock","bolt","star","leaf","wind","calm",
+      "bird","hawk","dawn","glow","dust","path","fire","sand","mist","rune",
+      "root","wolf","lion","tide","bark","seed","vine","rose","moss","reef",
+      "hill","lake","rain","cold","heat","lava","iron","gold","onyx","jade",
+      "opal","coal","gear","code","data","byte","ping","node","link","disk",
+      "sync","grid","hash","flow","core","beam","chip","drip","flux","loop",
+      "temp","snap","tick","rush","spin","move","push","pull","rise","fall",
+      "drop","hold","blue","teal","aqua","gray","dusk","noon","nite","void",
+      "mars","juno","vane","nova","rift","zone","cave","nest","dock","port",
+      "base","home","keep","fort","song","tune","beat","bell","ring","vibe",
+      "tone","note"
+    ];
 
-      function sample(arr, count) {
-        let result = [];
-        for (let i = 0; i < count; i++) {
-          const idx = Math.floor(Math.random() * arr.length);
-          result.push(arr[idx]);
-        }
-        return result;
+    function sample(arr, count) {
+      const result = [];
+      for (let i = 0; i < count; i++) {
+        const idx = Math.floor(Math.random() * arr.length);
+        result.push(arr[idx]);
       }
+      return result;
+    }
 
-      const chosenWords = sample(words, 2).map(word => word.charAt(0).toUpperCase() + word.slice(1));
+    function generatePassword() {
+      const digits = "23456789";
+      const symbols = "!@#$%^&*";
+      const includeSymbols = document.getElementById("symbols").checked;
+
+      const chosenWords = sample(words, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1));
       const numbers = sample(digits.split(''), 3).join('');
-      const passphrase = `${chosenWords[0]}-${chosenWords[1]}-${numbers}`;
+      let passphrase = `${chosenWords[0]}-${chosenWords[1]}-${numbers}`;
+
+      if (includeSymbols) {
+        const symCount = Math.floor(Math.random() * 2) + 1; // 1 or 2 symbols
+        const chosenSymbols = sample(symbols.split(''), symCount).join('');
+        passphrase += chosenSymbols;
+      }
 
       document.getElementById("password").textContent = passphrase;
     }
@@ -52,9 +184,9 @@
     function copyPassword() {
       const password = document.getElementById("password").textContent;
       navigator.clipboard.writeText(password).then(() => {
-        alert("Passphrase copied to clipboard!");
-      }, err => {
-        alert("Failed to copy: " + err);
+        const box = document.getElementById("password");
+        box.style.boxShadow = "0 0 0 5px var(--ring)";
+        setTimeout(() => box.style.boxShadow = "inset 0 0 10px rgba(34,197,94,0.15)", 600);
       });
     }
   </script>
