@@ -62,7 +62,7 @@
     }
     textarea {
       width: 100%;
-      height: 180px;
+      height: 160px;
       margin-top: 10px;
       font-family: monospace;
       font-size: 14px;
@@ -140,11 +140,15 @@
     <textarea id="windowsScript" readonly></textarea>
     <button onclick="copyToClipboard('windowsScript')">Copy Windows Script</button>
 
-    <h2>macOS Shell Script</h2>
-    <textarea id="macScript" readonly></textarea>
-    <button onclick="copyToClipboard('macScript')">Copy macOS Script</button>
+    <h2>macOS Alias Setup</h2>
+    <textarea id="macAlias" readonly></textarea>
+    <button onclick="copyToClipboard('macAlias')">Copy Alias Setup</button>
 
-    <p class="hint">This generator produces ready-to-run Tailscale login scripts for any custom coordination server.</p>
+    <h2>macOS Login Script</h2>
+    <textarea id="macLogin" readonly></textarea>
+    <button onclick="copyToClipboard('macLogin')">Copy Login Script</button>
+
+    <p class="hint">This generator produces ready-to-run Tailscale login scripts for both Windows and macOS, divided for convenience.</p>
   </main>
 
   <script>
@@ -154,23 +158,25 @@
       const server = document.getElementById("server").value;
       const nickname = document.getElementById("nickname").value;
 
-      // --- Windows: single line ---
+      // Windows single-line version
       const windowsScript =
 `tailscale login --accept-dns --hostname ${username} --login-server ${server} --auth-key ${key} --nickname ${nickname}
 
 echo "Please wait..."
 pause`;
 
-      // --- macOS: single line as well ---
-      const macScript =
+      // macOS divided version
+      const macAlias =
 `echo 'alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"' >> ~/.zshrc
-source ~/.zshrc
+source ~/.zshrc`;
 
-tailscale login --accept-dns --hostname ${username} --login-server ${server} --auth-key ${key} --nickname ${nickname}
+      const macLogin =
+`tailscale login --accept-dns --hostname ${username} --login-server ${server} --auth-key ${key} --nickname ${nickname}
 echo "Please wait..."`;
 
       document.getElementById("windowsScript").value = windowsScript;
-      document.getElementById("macScript").value = macScript;
+      document.getElementById("macAlias").value = macAlias;
+      document.getElementById("macLogin").value = macLogin;
     }
 
     function copyToClipboard(id) {
@@ -190,17 +196,23 @@ echo "Please wait..."`;
       const safeUsername = username.replace(/[^a-zA-Z0-9-_]/g, "_");
 
       const winBlob = new Blob([document.getElementById("windowsScript").value], { type: "text/plain" });
-      const macBlob = new Blob([document.getElementById("macScript").value], { type: "text/plain" });
+      const macAliasBlob = new Blob([document.getElementById("macAlias").value], { type: "text/plain" });
+      const macLoginBlob = new Blob([document.getElementById("macLogin").value], { type: "text/plain" });
 
       const winLink = document.createElement("a");
       winLink.href = URL.createObjectURL(winBlob);
       winLink.download = `${safeUsername}-login.bat`;
       winLink.click();
 
-      const macLink = document.createElement("a");
-      macLink.href = URL.createObjectURL(macBlob);
-      macLink.download = `${safeUsername}-login.sh`;
-      macLink.click();
+      const macAliasLink = document.createElement("a");
+      macAliasLink.href = URL.createObjectURL(macAliasBlob);
+      macAliasLink.download = `${safeUsername}-alias-setup.sh`;
+      macAliasLink.click();
+
+      const macLoginLink = document.createElement("a");
+      macLoginLink.href = URL.createObjectURL(macLoginBlob);
+      macLoginLink.download = `${safeUsername}-login.sh`;
+      macLoginLink.click();
     }
   </script>
 </body>
