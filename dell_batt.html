@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Battery Report Reader</title>
+  <style>
+    :root {
+      /* ✨ Tweak these to match your existing site theme */
+      --bg: #0b0f14;            /* page background */
+      --panel: #111823;         /* card background */
+      --muted: #94a3b8;         /* secondary text */
+      --text: #e6edf3;          /* primary text */
+      --accent: #60a5fa;        /* brand accent */
+      --ok: #34d399;            /* success */
+      --warn: #f59e0b;          /* warning */
+      --err: #ef4444;           /* error */
+      --ring: #1f3b57;          /* focus ring */
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+    @media (prefers-color-scheme: light) {
+      :root { --bg:#f6f8fb; --panel:#ffffff; --text:#0f172a; --muted:#475569; --ring:#dbeafe; }
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
+      background: radial-gradient(1200px 800px at 80% -10%, rgba(96,165,250,.15), transparent 60%),
+                  radial-gradient(900px 700px at -10% 110%, rgba(20,184,166,.12), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+    }
+    .container { max-width: 1100px; margin: 32px auto; padding: 0 20px; }
+    header { display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom: 18px; }
+    .title { font-size: clamp(22px, 4vw, 34px); font-weight: 800; letter-spacing: .3px; }
+    .subtitle { color: var(--muted); font-size: 14px; }
+
+    .grid { display:grid; grid-template-columns: 1.2fr .8fr; gap: 18px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+    .card { background: var(--panel); border: 1px solid rgba(148,163,184,.15); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .card > .hd { padding:16px 18px; border-bottom: 1px solid rgba(148,163,184,.12); display:flex; align-items:center; justify-content:space-between; gap:14px; }
+    .card > .bd { padding:18px; }
+
+    .uploader { display:grid; gap:12px; }
+    .drop {
+      border: 2px dashed rgba(96,165,250,.35);
+      border-radius: var(--radius);
+      padding: 22px; text-align:center; background: rgba(96,165,250,.06);
+      transition: background .2s, border-color .2s; cursor: pointer;
+    }
+    .drop.dragover { background: rgba(96,165,250,.12); border-color: var(--accent); }
+    .drop small { color: var(--muted); }
+    .btn { background: var(--accent); color: #031426; border:0; padding:10px 14px; border-radius: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 20px rgba(96,165,250,.35); }
+    .btn:disabled { opacity:.6; cursor:not-allowed; box-shadow:none; }
+    .btn.ghost { background: transparent; color: var(--text); border:1px solid rgba(148,163,184,.28); box-shadow:none; }
+
+    .kv { display:grid; grid-template-columns: 220px 1fr; gap: 8px 18px; align-items:center; }
+    .kv .k { color: var(--muted); font-size: 13px; }
+    .kv .v { font-weight: 700; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align:left; padding: 10px 12px; border-bottom: 1px dashed rgba(148,163,184,.18); }
+    th { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+    td { font-size: 15px; }
+
+    .pill { display:inline-flex; align-items:center; gap:8px; font-weight:700; padding:6px 10px; border-radius: 999px; }
+    .pill.ok { background: rgba(52,211,153,.12); color: #34d399; border:1px solid rgba(52,211,153,.35); }
+    .pill.warn { background: rgba(245,158,11,.12); color: #f59e0b; border:1px solid rgba(245,158,11,.35); }
+    .pill.err { background: rgba(239,68,68,.12); color: #ef4444; border:1px solid rgba(239,68,68,.35); }
+
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+    .muted { color: var(--muted); }
+    .copywrap { display:flex; gap:8px; }
+    .copywrap input { flex:1; padding: 11px 12px; border-radius: 12px; border:1px solid rgba(148,163,184,.28); background: transparent; color: var(--text); }
+
+    .summary { font-size: 15px; line-height: 1.5; }
+    footer { margin-top: 22px; color: var(--muted); font-size: 12px; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <div class="title">Battery Report Reader</div>
+        <div class="subtitle">Upload a Windows <span class="mono">battery_report.html</span> and get the essentials at a glance.</div>
+      </div>
+      <button class="btn ghost" id="resetBtn" title="Clear data" disabled>Reset</button>
+    </header>
+
+    <div class="grid">
+      <!-- Left: Uploader + Summary -->
+      <section class="card">
+        <div class="hd">
+          <strong>Upload report</strong>
+          <span class="muted">Single HTML file generated by <span class="mono">powercfg</span></span>
+        </div>
+        <div class="bd">
+          <div class="uploader">
+            <div id="drop" class="drop" tabindex="0" role="button" aria-label="Drop or choose a report">
+              <div style="font-weight:700; margin-bottom:6px;">Drag & drop report here</div>
+              <small>…or click to choose a <span class="mono">battery_report.html</span></small>
+              <input id="file" type="file" accept="text/html,.html,.htm" style="display:none" />
+            </div>
+            <div class="copywrap" title="Copy the command to generate a fresh report on Windows">
+              <input id="cmd" class="mono" value='powercfg /batteryreport /output "C:\\battery_report.html"' readonly />
+              <button class="btn" id="copyBtn">Copy</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Health pill + Quick stats -->
+      <aside class="card">
+        <div class="hd"><strong>Status</strong><span class="muted" id="statusHint">Waiting for report…</span></div>
+        <div class="bd">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+            <span id="healthPill" class="pill muted">No data</span>
+            <span id="healthRatio" class="mono" style="font-weight:800; font-size:20px;">—</span>
+          </div>
+          <div class="kv" style="margin-top:6px;">
+            <div class="k">Design Capacity</div><div class="v" id="designCap">—</div>
+            <div class="k">Full‑Charge Capacity</div><div class="v" id="fullCap">—</div>
+            <div class="k">Cycle Count</div><div class="v" id="cycles">—</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Details -->
+    <section class="card" style="margin-top:18px;">
+      <div class="hd"><strong>System Overview</strong><span class="muted" id="reportTime">—</span></div>
+      <div class="bd">
+        <div class="kv">
+          <div class="k">Device</div><div class="v" id="device">—</div>
+          <div class="k">Battery Manufacturer</div><div class="v" id="mfg">—</div>
+          <div class="k">Battery Model</div><div class="v" id="model">—</div>
+          <div class="k">Chemistry</div><div class="v" id="chem">—</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:18px;">
+      <div class="hd"><strong>Key Metrics</strong><span class="muted">What matters most</span></div>
+      <div class="bd">
+        <div style="overflow:auto;">
+          <table>
+            <thead><tr><th>Metric</th><th>Value</th><th>Interpretation</th></tr></thead>
+            <tbody id="metrics">
+              <tr><td>Health Ratio</td><td id="m_health">—</td><td>Full‑charge ÷ design capacity</td></tr>
+              <tr><td>Cycle Count</td><td id="m_cycles">—</td><td id="m_cycles_hint">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:18px;">
+      <div class="hd"><strong>Summary</strong></div>
+      <div class="bd summary" id="summary">Upload a report to generate a concise health summary.</div>
+    </section>
+
+    <footer>
+      Works fully offline in your browser. No data leaves your device.
+    </footer>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const drop = $("drop"), fileInput = $("file"), resetBtn = $("resetBtn");
+
+    drop.addEventListener('click', () => fileInput.click());
+    drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+
+    ;['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); drop.classList.add('dragover'); }));
+    ;['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); drop.classList.remove('dragover'); }));
+    drop.addEventListener('drop', (e)=>{ const f = [...e.dataTransfer.files].find(f=>/\.html?$/i.test(f.name)); if (f) readFile(f); });
+    fileInput.addEventListener('change', ()=>{ const f = fileInput.files[0]; if (f) readFile(f); });
+
+    $('copyBtn').addEventListener('click', async ()=>{
+      try { await navigator.clipboard.writeText($("cmd").value); flash($("copyBtn"), 'Copied!'); } catch { flash($("copyBtn"), 'Copy failed', true); }
+    });
+
+    resetBtn.addEventListener('click', ()=>{ location.reload(); });
+
+    function flash(btn, msg, isErr=false){
+      const prev = btn.textContent; btn.textContent = msg; const prevBg = btn.style.background;
+      if (isErr) btn.style.background = 'var(--err)';
+      setTimeout(()=>{ btn.textContent = prev; btn.style.background = prevBg; }, 1100);
+    }
+
+    async function readFile(file){
+      const text = await file.text();
+      parseBatteryReport(text);
+      resetBtn.disabled = false;
+      $("statusHint").textContent = file.name;
+    }
+
+    function parseBatteryReport(html){
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+
+      // Helpers to pull table cell values by label text
+      const findCellByLabel = (labelRegex) => {
+        const cells = Array.from(doc.querySelectorAll('td, th'));
+        const hit = cells.find(td => labelRegex.test(td.textContent.trim()));
+        if (!hit) return null;
+        // Prefer next sibling cell in same row
+        if (hit.nextElementSibling) return hit.nextElementSibling.textContent.trim();
+        // Otherwise, try the next cell in document order
+        const idx = cells.indexOf(hit);
+        return (cells[idx+1] ? cells[idx+1].textContent.trim() : null);
+      };
+
+      const getInstalledBatteriesRow = () => {
+        // Locate the "Installed batteries" table by heading text
+        const headings = Array.from(doc.querySelectorAll('h2,h3,h4')); // varies by Windows build
+        const installed = headings.find(h => /Installed\s+batteries/i.test(h.textContent));
+        if (!installed) return null;
+        const table = installed.nextElementSibling && installed.nextElementSibling.tagName === 'TABLE'
+          ? installed.nextElementSibling
+          : installed.parentElement.querySelector('table');
+        if (!table) return null;
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        // Return the first data row (skip header)
+        return rows.find(r => r.children.length >= 3);
+      };
+
+      const textOrDash = (v) => v && String(v).trim() ? String(v).trim() : '—';
+      const parseCapacity = (s) => {
+        if (!s) return null;
+        // Expect formats like "54,002 mWh" or "54002 mWh"
+        const m = s.replace(/[,\u00A0]/g,'').match(/(\d+(?:\.\d+)?)\s*mWh/i);
+        return m ? Number(m[1]) : null;
+      };
+
+      // --- Pull core fields ---
+      const device = findCellByLabel(/System\s+product\s+name/i) || findCellByLabel(/Computer\s+name/i);
+      const reportTime = findCellByLabel(/Report\s+generated|Report\s+time/i);
+
+      let mfg = null, model = null, chem = null, cycles = null, design = null, full = null;
+      const row = getInstalledBatteriesRow();
+      if (row) {
+        const cols = Array.from(row.children).map(td => td.textContent.trim());
+        // Heuristic mapping by common column labels
+        // Find the header row to map indices accurately
+        const table = row.closest('table');
+        const headerCells = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim().toUpperCase());
+        const colIndex = (name) => headerCells.findIndex(h => h.includes(name));
+        const idxName = colIndex('NAME');
+        const idxMfg = colIndex('MANUFACTURER');
+        const idxChem = colIndex('CHEMISTRY');
+        const idxDesign = colIndex('DESIGN');
+        const idxFull = colIndex('FULL CHARGE');
+        const idxCycles = colIndex('CYCLE');
+
+        model = idxName>=0 ? cols[idxName] : cols[0] || null;
+        mfg = idxMfg>=0 ? cols[idxMfg] : null;
+        chem = idxChem>=0 ? cols[idxChem] : null;
+        cycles = idxCycles>=0 ? cols[idxCycles] : null;
+        design = parseCapacity(idxDesign>=0 ? cols[idxDesign] : null);
+        full = parseCapacity(idxFull>=0 ? cols[idxFull] : null);
+      }
+
+      // Fallbacks if table not found
+      if (!design) design = parseCapacity(findCellByLabel(/Design\s+capacity/i));
+      if (!full)   full   = parseCapacity(findCellByLabel(/Full\s+charge\s+capacity/i));
+      if (!cycles) cycles = findCellByLabel(/Cycle\s+count/i);
+      if (!mfg)    mfg    = findCellByLabel(/Manufacturer/i);
+      if (!model)  model  = findCellByLabel(/Name/i);
+      if (!chem)   chem   = findCellByLabel(/Chemistry/i);
+
+      const cyclesNum = cycles ? (parseInt(String(cycles).replace(/[^0-9]/g,''),10) || null) : null;
+      const ratio = (full && design) ? (full / design * 100) : null;
+
+      // --- Populate UI ---
+      $('device').textContent = textOrDash(device);
+      $('reportTime').textContent = textOrDash(reportTime);
+      $('mfg').textContent = textOrDash(mfg);
+      $('model').textContent = textOrDash(model);
+      $('chem').textContent = textOrDash(chem);
+
+      $('designCap').textContent = design ? `${design.toLocaleString()} mWh` : '—';
+      $('fullCap').textContent   = full   ? `${full.toLocaleString()} mWh`   : '—';
+      $('cycles').textContent    = cyclesNum ?? '—';
+
+      $('m_health').textContent = ratio ? `${ratio.toFixed(1)} %` : '—';
+      $('m_cycles').textContent = cyclesNum ?? '—';
+      $('m_cycles_hint').textContent = cyclesNum==null ? '—' : cycleInterpretation(cyclesNum);
+
+      $('healthRatio').textContent = ratio ? `${ratio.toFixed(1)} %` : '—';
+      const pill = $('healthPill');
+      pill.classList.remove('ok','warn','err','muted');
+      if (ratio==null) { pill.textContent = 'No data'; pill.classList.add('muted'); }
+      else if (ratio >= 90) { pill.textContent = 'Excellent'; pill.classList.add('ok'); }
+      else if (ratio >= 80) { pill.textContent = 'Good'; pill.classList.add('ok'); }
+      else if (ratio >= 70) { pill.textContent = 'Fair'; pill.classList.add('warn'); }
+      else { pill.textContent = 'Degraded'; pill.classList.add('err'); }
+
+      $('summary').textContent = buildSummary({ device, ratio, cycles: cyclesNum });
+      $('statusHint').textContent = 'Parsed successfully';
+    }
+
+    function cycleInterpretation(n){
+      if (n < 150) return 'Low — typical Li‑ion life is 300–500 cycles before noticeable wear.';
+      if (n < 300) return 'Moderate — capacity loss may become more apparent after ~300 cycles.';
+      if (n < 500) return 'High — nearing typical cycle life; expect reduced runtime.';
+      return 'Very high — replacement may be warranted if health is poor.';
+    }
+
+    function buildSummary({ device, ratio, cycles }){
+      const d = device || 'This device';
+      const r = (ratio!=null) ? `${ratio.toFixed(0)}–${Math.min(100, Math.round(ratio))} %` : '—';
+      const wear = (ratio!=null) ? (100 - ratio).toFixed(1) : null;
+      if (ratio==null && cycles==null) return `${d} battery health summary will appear here once you upload a report.`;
+
+      let status;
+      if (ratio==null) status = 'insufficient data';
+      else if (ratio >= 90) status = 'excellent health';
+      else if (ratio >= 80) status = 'good health';
+      else if (ratio >= 70) status = 'fair condition';
+      else status = 'degraded condition';
+
+      const parts = [];
+      if (ratio!=null) parts.push(`${d} is performing at roughly ${r} of original capacity${wear?` (~${wear}% wear)`:''}`);
+      if (cycles!=null) parts.push(`with ${cycles} cycle${cycles===1?'':'s'}`);
+      const line1 = parts.join(', ') + '.';
+
+      let line2 = '';
+      if (ratio!=null && ratio >= 90) line2 = 'There are no signs of meaningful degradation.';
+      else if (ratio!=null && ratio >= 80) line2 = 'Healthy overall; mild wear may be noticeable under heavy load.';
+      else if (ratio!=null && ratio >= 70) line2 = 'Usable, but runtime is reduced; consider battery care to slow further wear.';
+      else if (ratio!=null) line2 = 'Runtime will be limited; plan for service or replacement.';
+
+      return `${line1} ${line2}`.trim();
+    }
+  </script>
+</body>
+</html>
