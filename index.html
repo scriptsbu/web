@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SBU Tools Hub</title>
 <style>
   body {
@@ -51,14 +51,8 @@
   }
 
   @keyframes fadeSlideIn {
-    from {
-      opacity: 0;
-      transform: translateX(-50px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
+    from { opacity: 0; transform: translateX(-50px); }
+    to { opacity: 1; transform: translateX(0); }
   }
 
   .menu {
@@ -66,21 +60,6 @@
     flex-direction: column;
     gap: 1rem;
     width: 280px;
-    opacity: 0;
-    transform: translateX(-40px);
-    animation: slideUp 1.5s ease forwards;
-    animation-delay: 0.6s;
-  }
-
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateX(-40px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
   }
 
   a {
@@ -116,29 +95,27 @@
   }
 
   .icon-display {
-    width: 120px;
-    height: 120px;
+    width: 220px;
+    height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.2;
-    filter: drop-shadow(0 0 10px rgba(127,255,212,0.6));
-    transition: all 0.3s ease;
-    font-size: 4rem;
-    animation: colorShift 6s infinite linear, fadeInIcon 1.8s ease forwards;
-    animation-delay: 0.9s;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
   }
 
-  @keyframes fadeInIcon {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 0.2; transform: translateY(0); }
+  .icon-display img {
+    width: 200px;
+    height: auto;
+    filter: drop-shadow(0 0 15px rgba(127, 255, 212, 0.8));
+    animation: colorShift 6s infinite linear;
   }
 
   @keyframes colorShift {
-    0%   { color: #00ffb4; filter: drop-shadow(0 0 10px #00ffb4); }
-    33%  { color: #00bfff; filter: drop-shadow(0 0 10px #00bfff); }
-    66%  { color: #1c8f6e; filter: drop-shadow(0 0 10px #1c8f6e); }
-    100% { color: #00ffb4; filter: drop-shadow(0 0 10px #00ffb4); }
+    0%   { filter: drop-shadow(0 0 10px #00ffb4); }
+    33%  { filter: drop-shadow(0 0 10px #00bfff); }
+    66%  { filter: drop-shadow(0 0 10px #1c8f6e); }
+    100% { filter: drop-shadow(0 0 10px #00ffb4); }
   }
 
   footer {
@@ -148,8 +125,6 @@
     color: #4dd0a8;
   }
 </style>
-<!-- Font Awesome for icons -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
   <h1>ScriptsBU Tool Hub</h1>
@@ -157,33 +132,41 @@
 
   <div class="container">
     <div class="menu">
-      <a href="https://scriptsbu.github.io/web/copy.html" class="button" onmouseover="showIcon('fa-copy')" onmouseout="clearIcon()">Quick Name & Email Copier</a>
-      <a href="https://scriptsbu.github.io/web/passwd_gen.html" class="button" onmouseover="showIcon('fa-key')" onmouseout="clearIcon()">Password Generator</a>
-      <a href="https://scriptsbu.github.io/web/tail.html" class="button" onmouseover="showIcon('fa-network-wired')" onmouseout="clearIcon()">Tailscale Command Generator</a>
-      <a href="https://scriptsbu.github.io/web/ztime.html" class="button" onmouseover="showIcon('fa-clock')" onmouseout="clearIcon()">MS Log Time Converter</a>
-      <a href="https://scriptsbu.github.io/web/dell_batt.html" class="button" onmouseover="showIcon('fa-battery-three-quarters')" onmouseout="clearIcon()">Dell Battery Health Check</a>
+      <a href="https://scriptsbu.github.io/web/copy.html" class="button" onmouseover="showIcon('copy')" onmouseout="clearIcon()">Quick Name & Email Copier</a>
+      <a href="https://scriptsbu.github.io/web/passwd_gen.html" class="button" onmouseover="showIcon('key')" onmouseout="clearIcon()">Password Generator</a>
+      <a href="https://scriptsbu.github.io/web/tail.html" class="button" onmouseover="showIcon('network')" onmouseout="clearIcon()">Tailscale Command Generator</a>
+      <a href="https://scriptsbu.github.io/web/ztime.html" class="button" onmouseover="showIcon('clock')" onmouseout="clearIcon()">MS Log Time Converter</a>
+      <a href="https://scriptsbu.github.io/web/dell_batt.html" class="button" onmouseover="showIcon('battery')" onmouseout="clearIcon()">Dell Battery Health Check</a>
     </div>
 
     <div class="icon-display" id="iconDisplay">
-      <i class="fas fa-cog"></i>
+      <!-- default image placeholder -->
     </div>
   </div>
 
   <footer>© 2025 ScriptsBU</footer>
 
 <script>
-  const iconDisplay = document.getElementById('iconDisplay');
+  const iconDisplay = document.getElementById("iconDisplay");
 
-  function showIcon(iconClass) {
-    iconDisplay.innerHTML = `<i class="fas ${iconClass}"></i>`;
-    iconDisplay.style.opacity = '1';
-    iconDisplay.style.transform = 'scale(1.08)';
+  const icons = {
+    copy: "https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/files.svg",
+    key: "https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/key.svg",
+    network: "https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/network.svg",
+    clock: "https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/clock.svg",
+    battery: "https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/battery-3.svg"
+  };
+
+  function showIcon(name) {
+    iconDisplay.innerHTML = `<img src="${icons[name]}" alt="${name} icon">`;
+    iconDisplay.style.opacity = "1";
+    iconDisplay.style.transform = "scale(1.05)";
   }
 
   function clearIcon() {
-    iconDisplay.style.opacity = '0.2';
-    iconDisplay.style.transform = 'scale(1)';
-    iconDisplay.innerHTML = `<i class="fas fa-cog"></i>`;
+    iconDisplay.style.opacity = "0";
+    iconDisplay.style.transform = "scale(1)";
+    iconDisplay.innerHTML = "";
   }
 </script>
 </body>
