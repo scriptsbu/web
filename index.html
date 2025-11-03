@@ -53,15 +53,28 @@
     color: #aefcd9;
     font-size: 1rem;
     letter-spacing: 0.5px;
+    box-shadow: 0 0 8px rgba(0, 255, 180, 0.25);
     transition: all 0.25s ease;
-    box-shadow: 0 0 6px rgba(0, 255, 180, 0.2);
+    animation: glowPulse 3s ease-in-out infinite;
   }
 
   .button:hover {
     background: #1c8f6e;
     color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 0 15px rgba(0, 255, 180, 0.5);
+    box-shadow: 0 0 20px rgba(0, 255, 180, 0.6);
+  }
+
+  @keyframes glowPulse {
+    0% {
+      box-shadow: 0 0 8px rgba(0, 255, 180, 0.25);
+    }
+    50% {
+      box-shadow: 0 0 18px rgba(0, 255, 180, 0.6);
+    }
+    100% {
+      box-shadow: 0 0 8px rgba(0, 255, 180, 0.25);
+    }
   }
 
   footer {
@@ -78,7 +91,7 @@
 
   <div class="menu">
     <a href="https://scriptsbu.github.io/web/copy.html" class="button">Quick Name & Email Copier</a>
-    <a href="https://scriptsbu.github.io/web/password_gen.html" class="button">Password Generator</a>
+    <a href="https://scriptsbu.github.io/web/passwd_gen.html" class="button">Password Generator</a>
     <a href="https://scriptsbu.github.io/web/tail.html" class="button">Tailscale Command Generator</a>
     <a href="https://scriptsbu.github.io/web/ztime.html" class="button">MS Log Time Converter</a>
     <a href="https://scriptsbu.github.io/web/dell_batt.html" class="button">Dell Battery Health Check</a>
