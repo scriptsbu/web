@@ -1,194 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Password Generator</title>
-  <style>
-    :root {
-      --bg: #0f172a;
-      --panel: #111827;
-      --muted: #94a3b8;
-      --text: #e5e7eb;
-      --accent: #22c55e;
-      --accent-600: #16a34a;
-      --ring: rgba(34, 197, 94, 0.35);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBU Tools Hub</title>
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f8f9fb;
+    color: #222;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
 
-    * { box-sizing: border-box; }
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
 
-    html, body {
-      height: 100%;
-      margin: 0;
-    }
+  p {
+    color: #555;
+    margin-bottom: 2rem;
+  }
 
-    body {
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial;
-      background: radial-gradient(1200px 800px at 50% -10%, #1f2937 0%, var(--bg) 55%);
-      color: var(--text);
-      display: grid;
-      place-items: center;
-      padding: 24px;
-    }
+  .menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 280px;
+  }
 
-    .card {
-      width: 100%;
-      max-width: 720px;
-      background: linear-gradient(180deg, #111827 0%, #0b1220 100%);
-      border: 1px solid #1f2937;
-      border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
-      padding: 32px;
-      text-align: center;
-    }
+  a {
+    text-decoration: none;
+  }
 
-    h1 {
-      margin: 0 0 16px;
-      font-size: clamp(22px, 2.6vw, 32px);
-    }
+  .button {
+    display: block;
+    text-align: center;
+    padding: 14px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 1rem;
+    color: #333;
+    transition: all 0.2s ease;
+  }
 
-    .clipart {
-      max-width: 200px;
-      margin-bottom: 24px;
-      filter: drop-shadow(0 0 12px var(--ring));
-      border-radius: 12px;
-    }
+  .button:hover {
+    background: #0078ff;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
 
-    .password-box {
-      font-size: 1.6em;
-      margin: 20px 0;
-      padding: 14px 24px;
-      border: 1px solid #1f2937;
-      border-radius: 14px;
-      background: #0b1220;
-      color: var(--accent);
-      min-width: 280px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      box-shadow: inset 0 0 10px rgba(34,197,94,0.15);
-      user-select: all;
-      transition: box-shadow 0.2s ease;
-    }
-
-    .buttons {
-      margin-top: 20px;
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      border: 1px solid #1f2937;
-      background: linear-gradient(180deg, #1e293b 0%, #0b1220 100%);
-      color: var(--text);
-      padding: 10px 18px;
-      font-size: 15px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: transform .02s ease, background .15s ease, border-color .15s ease;
-    }
-
-    button:hover { border-color: #334155; }
-    button:active { transform: translateY(1px); }
-
-    .primary {
-      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-600) 100%);
-      color: #062612;
-      font-weight: 600;
-      border-color: transparent;
-      box-shadow: 0 0 12px var(--ring);
-    }
-
-    .options {
-      margin-top: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--accent);
-      cursor: pointer;
-    }
-
-    .hint {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-  </style>
+  footer {
+    position: fixed;
+    bottom: 12px;
+    font-size: 0.9rem;
+    color: #999;
+  }
+</style>
 </head>
 <body>
-  <main class="card">
-    <img class="clipart" src="https://private-user-images.githubusercontent.com/137096347/508584883-215b485d-f05d-442e-9a8c-60911ec9dbb6.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjIwMTk4NTIsIm5iZiI6MTc2MjAxOTU1MiwicGF0aCI6Ii8xMzcwOTYzNDcvNTA4NTg0ODgzLTIxNWI0ODVkLWYwNWQtNDQyZS05YThjLTYwOTExZWM5ZGJiNi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMTAxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTEwMVQxNzUyMzJaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1kMmVlMmQ2ZGJkZmEyOGNmNGM5MWViM2FjM2RhYjNiNjgzZjYxNGU0OTJlMmUyNWU2NDkwZWY1ODkzYmE3MWQzJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.WIWYi0QwRNYSDKmfoHnRBBKrfZFgUdZ8kfIjFmKEYw0" alt="Corsair Logo">
-    <h1>Alberto's Easy Password Generator</h1>
-    <div class="password-box" id="password">Click below to generate</div>
-    <div class="buttons">
-      <button class="primary" onclick="generatePassword()">Generate Passphrase</button>
-      <button onclick="copyPassword()">Copy to Clipboard</button>
-    </div>
-    <div class="options">
-      <label for="symbols"><input type="checkbox" id="symbols"> Include up to 2 symbols (!@#$%^&*)</label>
-    </div>
-    <p class="hint">Passphrases use random four-letter words, digits, and optional symbols for strong security over 7 million combinations (or 530 million with symbols enabled).</p>
-  </main>
+  <h1>ScriptsBU Tool Hub</h1>
+  <p>Select a utility below:</p>
 
-  <script>
-    const words = [
-      "moon","tree","jump","wave","rock","bolt","star","leaf","wind","calm",
-      "bird","hawk","dawn","glow","dust","path","fire","sand","mist","rune",
-      "root","wolf","lion","tide","bark","seed","vine","rose","moss","reef",
-      "hill","lake","rain","cold","heat","lava","iron","gold","onyx","jade",
-      "opal","coal","gear","code","data","byte","ping","node","link","disk",
-      "sync","grid","hash","flow","core","beam","chip","drip","flux","loop",
-      "temp","snap","tick","rush","spin","move","push","pull","rise","fall",
-      "drop","hold","blue","teal","aqua","gray","dusk","noon","nite","void",
-      "mars","juno","vane","nova","rift","zone","cave","nest","dock","port",
-      "base","home","keep","fort","song","tune","beat","bell","ring","vibe",
-      "tone","note"
-    ];
+  <div class="menu">
+    <a href="https://scriptsbu.github.io/web/copy.html" class="button">Quick Name & Email Copier</a>
+    <a href="https://scriptsbu.github.io/web/password_gen.html" class="button">Password Generator</a>
+    <a href="https://scriptsbu.github.io/web/tail.html" class="button">Tailscale Command Generator</a>
+    <a href="https://scriptsbu.github.io/web/ztime.html" class="button">MS Log Time Converter</a>
+    <a href="https://scriptsbu.github.io/web/dell_batt.html" class="button">Dell Battery Health Check</a>
+  </div>
 
-    function sample(arr, count) {
-      const result = [];
-      for (let i = 0; i < count; i++) {
-        const idx = Math.floor(Math.random() * arr.length);
-        result.push(arr[idx]);
-      }
-      return result;
-    }
-
-    function generatePassword() {
-      const digits = "23456789";
-      const symbols = "!@#$%^&*";
-      const includeSymbols = document.getElementById("symbols").checked;
-
-      const chosenWords = sample(words, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1));
-      const numbers = sample(digits.split(''), 3).join('');
-      let passphrase = `${chosenWords[0]}-${chosenWords[1]}-${numbers}`;
-
-      if (includeSymbols) {
-        const symCount = Math.floor(Math.random() * 2) + 1; // 1 or 2 symbols
-        const chosenSymbols = sample(symbols.split(''), symCount).join('');
-        passphrase += chosenSymbols;
-      }
-
-      document.getElementById("password").textContent = passphrase;
-    }
-
-    function copyPassword() {
-      const password = document.getElementById("password").textContent;
-      navigator.clipboard.writeText(password).then(() => {
-        const box = document.getElementById("password");
-        box.style.boxShadow = "0 0 0 5px var(--ring)";
-        setTimeout(() => box.style.boxShadow = "inset 0 0 10px rgba(34,197,94,0.15)", 600);
-      });
-    }
-  </script>
+  <footer>© 2025 ScriptsBU</footer>
 </body>
 </html>
