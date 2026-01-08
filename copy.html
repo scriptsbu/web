@@ -14,8 +14,10 @@
       --accent-600: #16a34a;
       --ring: rgba(34, 197, 94, 0.35);
     }
+
     * { box-sizing: border-box; }
     html, body { height: 100%; }
+
     body {
       margin: 0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial;
@@ -25,22 +27,51 @@
       place-items: center;
       padding: 24px;
     }
+
     .card {
       width: 100%;
-      max-width: 720px;
+      max-width: 820px;
       background: linear-gradient(180deg, #111827 0%, #0b1220 100%);
       border: 1px solid #1f2937;
       border-radius: 20px;
       box-shadow: 0 8px 30px rgba(0,0,0,0.35);
       padding: 22px;
     }
-    h1 { margin: 0 0 10px; font-size: clamp(20px, 2.4vw, 28px); }
-    p.helper { margin: 4px 0 18px; color: var(--muted); font-size: 14px; }
-    .row { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
-    .stack { display: grid; gap: 12px; }
-    .field { display: grid; gap: 6px; }
-    label { font-size: 13px; color: var(--muted); }
-    input[type="text"], input[type="email"] {
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(20px, 2.4vw, 28px);
+    }
+
+    p.helper {
+      margin: 4px 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    input[type="text"],
+    input[type="email"] {
       background: #0b1220;
       border: 1px solid #1f2937;
       border-radius: 12px;
@@ -51,8 +82,16 @@
       transition: border-color .15s ease, box-shadow .15s ease;
       width: 100%;
     }
-    input[readonly] { color: #cbd5e1; }
-    input:focus { border-color: var(--accent); box-shadow: 0 0 0 5px var(--ring); }
+
+    input[readonly] {
+      color: #cbd5e1;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 5px var(--ring);
+    }
+
     button {
       border: 1px solid #1f2937;
       background: linear-gradient(180deg, #1e293b 0%, #0b1220 100%);
@@ -63,25 +102,55 @@
       cursor: pointer;
       transition: transform .02s ease, background .15s ease, border-color .15s ease;
     }
+
     button:hover { border-color: #334155; }
     button:active { transform: translateY(1px); }
+
     .primary {
       background: linear-gradient(180deg, var(--accent) 0%, var(--accent-600) 100%);
       color: #062612;
       font-weight: 600;
       border-color: transparent;
     }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    @media (max-width: 700px) { .grid-3 { grid-template-columns: 1fr; } }
-    .copy-wrap { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
-    .copied { border-color: var(--accent) !important; box-shadow: 0 0 0 5px var(--ring) !important; }
-    .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .copy-wrap {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .copied {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 5px var(--ring) !important;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
   </style>
 </head>
+
 <body>
   <main class="card">
     <h1>Quick Name & Email Copier</h1>
-    <p class="helper">Paste an email like <em>first.last@domain.com</em>. We'll parse and give you copyable fields.</p>
+    <p class="helper">
+      Paste an email like <em>first.last@domain.com</em>. We'll parse and give you copyable fields.
+    </p>
 
     <div class="stack">
       <div class="field">
@@ -93,7 +162,15 @@
         <div class="hint">Press <kbd>Enter</kbd> to parse automatically.</div>
       </div>
 
-      <div class="grid-3">
+      <div class="grid-4">
+        <div class="field">
+          <label for="displayName">Display name</label>
+          <div class="copy-wrap">
+            <input id="displayName" type="text" readonly placeholder="—" />
+            <button data-copy="displayName">Copy</button>
+          </div>
+        </div>
+
         <div class="field">
           <label for="first">First name</label>
           <div class="copy-wrap">
@@ -101,6 +178,7 @@
             <button data-copy="first">Copy</button>
           </div>
         </div>
+
         <div class="field">
           <label for="last">Last name</label>
           <div class="copy-wrap">
@@ -108,6 +186,7 @@
             <button data-copy="last">Copy</button>
           </div>
         </div>
+
         <div class="field">
           <label for="fullEmail">Email</label>
           <div class="copy-wrap">
@@ -123,13 +202,19 @@
     const emailInput = document.querySelector('#email');
     const firstInput = document.querySelector('#first');
     const lastInput = document.querySelector('#last');
+    const displayNameInput = document.querySelector('#displayName');
     const fullEmailInput = document.querySelector('#fullEmail');
     const parseBtn = document.querySelector('#parse');
 
     function titleCase(str) {
       if (!str) return '';
-      return str.split(/([-'\s])/g)
-        .map(part => /^[A-Za-z]/.test(part) ? part[0].toUpperCase() + part.slice(1).toLowerCase() : part)
+      return str
+        .split(/([-'\s])/g)
+        .map(part =>
+          /^[A-Za-z]/.test(part)
+            ? part[0].toUpperCase() + part.slice(1).toLowerCase()
+            : part
+        )
         .join('')
         .replace(/\s+/g, ' ');
     }
@@ -137,37 +222,44 @@
     function parseEmail(value) {
       const raw = (value || '').trim();
       fullEmailInput.value = raw;
+
       if (!raw.includes('@')) {
         firstInput.value = '';
         lastInput.value = '';
+        displayNameInput.value = '';
         return;
       }
+
       const local = raw.split('@')[0];
-      if (!local) { firstInput.value = ''; lastInput.value = ''; return; }
+      if (!local) return;
 
       const parts = local.split(/[._-]+/).filter(Boolean);
-      if (parts.length === 1) {
-        firstInput.value = titleCase(parts[0]);
-        lastInput.value = '';
-        return;
-      }
 
-      let first = parts[0];
-      let last = parts.slice(1).join('-'); // keep hyphenated/compound last names intact
+      let first = '';
+      let last = '';
+
+      if (parts.length === 1) {
+        first = parts[0];
+      } else {
+        first = parts[0];
+        last = parts.slice(1).join('-');
+      }
 
       firstInput.value = titleCase(first);
       lastInput.value = titleCase(last);
+      displayNameInput.value = titleCase([first, last].filter(Boolean).join(' '));
     }
 
     function copyFrom(id) {
       const el = document.getElementById(id);
-      if (!el) return;
-      const text = el.value;
-      if (!text) return;
+      if (!el || !el.value) return;
+
       el.classList.add('copied');
       setTimeout(() => el.classList.remove('copied'), 600);
-      if (navigator.clipboard) navigator.clipboard.writeText(text);
-      else {
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(el.value);
+      } else {
         el.select();
         document.execCommand('copy');
         el.blur();
@@ -176,6 +268,7 @@
 
     parseBtn.addEventListener('click', () => parseEmail(emailInput.value));
     emailInput.addEventListener('input', () => parseEmail(emailInput.value));
+
     emailInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -190,7 +283,7 @@
     });
 
     window.addEventListener('DOMContentLoaded', () => {
-      emailInput.value = 'first.last@domain.com';
+      emailInput.value = 'paul.gonzalez@saronic.com';
       parseEmail(emailInput.value);
     });
   </script>
